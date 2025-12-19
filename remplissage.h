@@ -11,16 +11,13 @@ typedef struct {
 } Curseur;
 
 void nettoyerEcran();
-void afficherInfos(int niveau, int vies, int coups, int temps);
 void remplirPlateau(char plateau[HAUTEUR][LARGEUR]);
 void afficherPlateau(char plateau[HAUTEUR][LARGEUR]);
+void afficherInfos(int niveau, int vies, int coups, int temps);
+int estDeMemeCouleur(char a, char b);
 void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR]);
 void appliquerGravite(char plateau[HAUTEUR][LARGEUR]);
-void echangerSymboles(char plateau[HAUTEUR][LARGEUR], Curseur c1, Curseur c2);
 
-char obtenirBonusLigne(char s);
-char obtenirBonusColonne(char s);
-void detecterEtCreerBonus(char plateau[HAUTEUR][LARGEUR], Curseur coup);
-void activerPouvoir(char plateau[HAUTEUR][LARGEUR], int x, int y);
+void echangerSymboles(char plateau[HAUTEUR][LARGEUR], Curseur c1, Curseur c2);
 
 #endif

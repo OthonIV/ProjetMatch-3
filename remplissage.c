@@ -5,7 +5,9 @@
 #define HAUTEUR 9
 #define LARGEUR 9
 
-char symboles[5] = {'X', '&', '+', 'O', '#'};
+char symboles[5] = {'X', '&', '+', 'O', '#'}; // Symboles de base
+char bonusH[5] = {'1', '2', '3', '4', '5'}; // Bonus Horizontal (=)
+char bonusV[5] = {'A', 'B', 'C', 'D', 'E'}; // Bonus Vertical (H)
 
 // Structure pour les positions
 typedef struct {
@@ -13,10 +15,10 @@ typedef struct {
     int y; // Ligne
 } Curseur;
 
-// Prototypes
+// Prototype
+int estDeMemeCouleur(char a, char b);
 void echangerSymboles(char plateau[HAUTEUR][LARGEUR], Curseur c1, Curseur c2);
-int memeFamille(char a, char b);
-void activerPouvoir(char plateau[HAUTEUR][LARGEUR], int x, int y);
+
 
 void nettoyerEcran() {
     clrscr();
@@ -42,107 +44,194 @@ void remplirPlateau(char plateau[HAUTEUR][LARGEUR]) {
 
 void afficherPlateau(char plateau[HAUTEUR][LARGEUR]) {
     nettoyerEcran();
-    for (int i = 0; i < HAUTEUR; i++) {
-        printf("  ");
-        for (int j = 0; j < LARGEUR; j++) printf("+---");
-        printf("+\n  ");
-        for (int j = 0; j < LARGEUR; j++) {
-            char val = plateau[i][j];
-            printf("|");
-            // Couleurs basées sur le caractère
-            switch (val) {
-                case 'X': case 'x': case '1': set_color(RED, BLACK); break;
-                case '&': case 'a': case '2': set_color(CYAN, BLACK); break;
-                case '+': case 'p': case '3': set_color(GREEN, BLACK); break;
-                case 'O': case 'o': case '4': set_color(YELLOW, BLACK); break;
-                case '#': case 'm': case '5': set_color(MAGENTA, BLACK); break;
-                default:  set_color(WHITE, BLACK);
-            }
-            // Affichage du bonus
-            if (val >= '1' && val <= '5') printf(" H "); // Bonus Colonne
-            else if (val == 'x' || val == 'a' || val == 'p' || val == 'o' || val == 'm') printf(" = "); // Bonus Ligne
-            else if (val == ' ') printf("   ");
-            else printf(" %c ", val);
-            set_color(WHITE, BLACK);
-        }
-        printf("|\n");
-    }
+    int i, j;
+
+    // Afficher la bordure du haut
     printf("  ");
-    for (int j = 0; j < LARGEUR; j++) printf("+---");
+    for (j = 0; j < LARGEUR; j++) printf("+---");
     printf("+\n");
+
+    for (i = 0; i < HAUTEUR; i++) {
+        printf("  "); // Marge à gauche
+        for (j = 0; j < LARGEUR; j++) {
+            printf("|"); // Bordure gauche de chaque case
+            
+            char val = plateau[i][j];
+
+            // Couleur
+            if (estDeMemeCouleur(val, 'X')) set_color(RED, BLACK);
+            else if (estDeMemeCouleur(val, '&')) set_color(CYAN, BLACK);
+            else if (estDeMemeCouleur(val, '+')) set_color(GREEN, BLACK);
+            else if (estDeMemeCouleur(val, 'O')) set_color(YELLOW, BLACK);
+            else if (estDeMemeCouleur(val, '#')) set_color(MAGENTA, BLACK);
+            else set_color(WHITE, BLACK); // Couleur par défaut (ex: cases vides)
+
+            // Symbole
+            if (val == '1' || val == '2' || val == '3' || val == '4' || val == '5') 
+                printf(" = ");
+            else if (val == 'A' || val == 'B' || val == 'C' || val == 'D' || val == 'E') 
+                printf(" H ");
+            else 
+                printf(" %c ", val);
+
+            set_color(WHITE, BLACK); // On remet en blanc pour les bordures "|"
+        }
+        printf("|\n"); // Fin de la ligne du plateau
+
+        // Afficher la ligne de séparation entre chaque rangée
+        printf("  ");
+        for (j = 0; j < LARGEUR; j++) printf("+---");
+        printf("+\n");
+    }
+}
+
+
+// Vérifie si deux symboles appartiennent à la même famille de couleur
+int estDeMemeCouleur(char a, char b) {
+    if (a == ' ' || b == ' ') return 0;
+    
+    char originaux[] = {'X', '&', '+', 'O', '#'};
+    char bonusH[]    = {'1', '2', '3', '4', '5'};
+    char bonusV[]    = {'A', 'B', 'C', 'D', 'E'};
+
+    for (int i = 0; i < 5; i++) {
+        // On vérifie si 'a' ET 'b' sont l'un des trois types de la couleur i
+        int aOk = (a == originaux[i] || a == bonusH[i] || a == bonusV[i]);
+        int bOk = (b == originaux[i] || b == bonusH[i] || b == bonusV[i]);
+        if (aOk && bOk) return 1;
+    }
+    return 0;
 }
 
 
 void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR]) {
-    int i, j;
-    int aSupprimer[HAUTEUR][LARGEUR] = {0}; // 1 si on doit supprimer, 0 sinon
+    // 0: rien, 1: à supprimer (pion normal ou bonus)
+    int aSupprimer[HAUTEUR][LARGEUR] = {0}; 
+    int i, j, k, m;
 
-    // Détection des alignements de 3 (Horizontaux)
+    // Recherche horizontale
     for (i = 0; i < HAUTEUR; i++) {
-        for (j = 0; j < LARGEUR - 2; j++) {
-            if (plateau[i][j] != ' ' && 
-                memeFamille(plateau[i][j], plateau[i][j+1]) && 
-                memeFamille(plateau[i][j], plateau[i][j+2])) {
-                aSupprimer[i][j] = 1;
-                aSupprimer[i][j+1] = 1;
-                aSupprimer[i][j+2] = 1;
+        for (j = 0; j <= LARGEUR - 3; ) {
+            char ref = plateau[i][j];
+            if (ref == ' ') { j++; continue; }
+
+            int count = 1;
+            while (j + count < LARGEUR && estDeMemeCouleur(ref, plateau[i][j + count])) {
+                count++;
             }
+
+            if (count >= 3) {
+                // On marque tout pour la suppression
+                for (k = 0; k < count; k++) {
+                    int col = j + k;
+                    aSupprimer[i][col] = 1;
+                    
+                    // Si on rencontre un bonus déjà présent, on active son effet
+                    for (m = 0; m < 5; m++) {
+                        if (plateau[i][col] == bonusH[m]) { // Bonus Ligne (=)
+                            for (int c = 0; c < LARGEUR; c++) aSupprimer[i][c] = 1;
+                        }
+                        if (plateau[i][col] == bonusV[m]) { // Bonus Colonne (H)
+                            for (int l = 0; l < HAUTEUR; l++) aSupprimer[l][col] = 1;
+                        }
+                    }
+                }
+
+                // Création du nouveau bonus si alignement de 4 ou plus
+                if (count >= 4) {
+                    char nouveauBonus = ' ';
+                    // On cherche quelle est la couleur de base pour donner le bon bonus
+                    for (m = 0; m < 5; m++) {
+                        if (estDeMemeCouleur(ref, symboles[m])) {
+                            nouveauBonus = bonusH[m]; // On crée un '='
+                        }
+                    }
+                    // On place le bonus au début de l'alignement
+                    if (nouveauBonus != ' ') {
+                        plateau[i][j] = nouveauBonus; 
+                        aSupprimer[i][j] = 0; // On sauve cette case de la suppression !
+                    }
+                }
+
+                j += count;
+            } else j++;
         }
     }
 
-    // Détection des alignements de 3 (Verticaux)
+    // Recherche verticale
     for (j = 0; j < LARGEUR; j++) {
-        for (i = 0; i < HAUTEUR - 2; i++) {
-            if (plateau[i][j] != ' ' && 
-                memeFamille(plateau[i][j], plateau[i+1][j]) && 
-                memeFamille(plateau[i][j], plateau[i+2][j])) {
-                aSupprimer[i][j] = 1;
-                aSupprimer[i+1][j] = 1;
-                aSupprimer[i+2][j] = 1;
+        for (i = 0; i <= HAUTEUR - 3; ) {
+            char ref = plateau[i][j];
+            if (ref == ' ') { i++; continue; }
+
+            int count = 1;
+            while (i + count < HAUTEUR && estDeMemeCouleur(ref, plateau[i + count][j])) {
+                count++;
             }
+
+            if (count >= 3) {
+                // On marque tout pour la suppression
+                for (k = 0; k < count; k++) {
+                    int lig = i + k;
+                    aSupprimer[lig][j] = 1;
+
+                    // Si on rencontre un bonus déjà présent, on active son effet
+                    for (m = 0; m < 5; m++) {
+                        if (plateau[lig][j] == bonusV[m]) { // Bonus Colonne (H)
+                            for (int l = 0; l < HAUTEUR; l++) aSupprimer[l][j] = 1;
+                        }
+                        if (plateau[lig][j] == bonusH[m]) { // Bonus Ligne (=)
+                            for (int c = 0; c < LARGEUR; c++) aSupprimer[lig][c] = 1;
+                        }
+                    }
+                }
+
+                // Création du nouveau bonus si alignement de 4 ou plus
+                if (count >= 4) {
+                    char nouveauBonus = ' ';
+                    for (m = 0; m < 5; m++) {
+                        if (estDeMemeCouleur(ref, symboles[m])) {
+                            nouveauBonus = bonusV[m]; // On crée un 'H'
+                        }
+                    }
+                    if (nouveauBonus != ' ') {
+                        plateau[i][j] = nouveauBonus;
+                        aSupprimer[i][j] = 0; // On sauve cette case !
+                    }
+                }
+
+                i += count;
+            } else i++;
         }
     }
 
-    // Application des pouvoirs et suppression
+    // Suppression effective des symboles marqués
     for (i = 0; i < HAUTEUR; i++) {
         for (j = 0; j < LARGEUR; j++) {
             if (aSupprimer[i][j] == 1) {
-                // Si la case qu'on va supprimer est un bonus, on active son pouvoir AVANT
-                activerPouvoir(plateau, j, i); 
-                plateau[i][j] = ' '; // On vide la case
+                plateau[i][j] = ' ';
             }
         }
     }
 }
 
 void appliquerGravite(char plateau[HAUTEUR][LARGEUR]) {
-    int colonne, ligne;
-    int espaceTrouve;
-
-    do {
-        espaceTrouve = 0;
-
-        for (colonne = 0; colonne < LARGEUR; colonne++) {
-
-            // Parcours du bas vers le haut
-            for (ligne = HAUTEUR - 1; ligne >= 0; ligne--) {
-
-                if (plateau[ligne][colonne] == ' ') {
-
-                    // Descente d'UNE ligne
-                    for (int k = ligne; k > 0; k--) {
-                        plateau[k][colonne] = plateau[k - 1][colonne];
-                    }
-
-                    // Génération en haut
-                    plateau[0][colonne] = symboles[rand() % 5];
-                    espaceTrouve = 1;
-                    break; // UNE SEULE suppression par colonne
-                }
+    for (int j = 0; j < LARGEUR; j++) {
+        int vide = HAUTEUR - 1;
+        // On fait descendre les caractères existants
+        for (int i = HAUTEUR - 1; i >= 0; i--) {
+            if (plateau[i][j] != ' ') {
+                char temp = plateau[i][j];
+                plateau[i][j] = ' ';
+                plateau[vide][j] = temp;
+                vide--;
             }
         }
-        supprimerAlignements3(plateau); // Pour enlever les alignements créés
-    } while (espaceTrouve); // Recommence tant qu'il reste des espaces
+        // On remplit le haut avec de nouveaux caractères normaux
+        for (int i = vide; i >= 0; i--) {
+            plateau[i][j] = symboles[rand() % 5];
+        }
+    }
 }
 
 
@@ -150,72 +239,4 @@ void echangerSymboles(char plateau[HAUTEUR][LARGEUR], Curseur c1, Curseur c2) {
     char temp = plateau[c1.y][c1.x];
     plateau[c1.y][c1.x] = plateau[c2.y][c2.x];
     plateau[c2.y][c2.x] = temp;
-}
-
-
-int memeFamille(char a, char b) {
-    if (a == ' ' || b == ' ') return 0;
-    // On transforme tout en symbole de base pour comparer
-    char baseA = a, baseB = b;
-    if (a == 'x' || a == '1') baseA = 'X';
-    if (b == 'x' || b == '1') baseB = 'X';
-    if (a == 'a' || a == '2') baseA = '&';
-    if (b == 'a' || b == '2') baseB = '&';
-    if (a == 'p' || a == '3') baseA = '+';
-    if (b == 'p' || b == '3') baseB = '+';
-    if (a == 'o' || a == '4') baseA = 'O';
-    if (b == 'o' || b == '4') baseB = 'O';
-    if (a == 'm' || a == '5') baseA = '#';
-    if (b == 'm' || b == '5') baseB = '#';
-    
-    return (baseA == baseB);
-}
-
-
-// BONUS
-// Table de conversion pour transformer un symbole de base en bonus
-char obtenirBonusLigne(char s) {
-    if (s == 'X') return 'x'; if (s == '&') return 'a'; if (s == '+') return 'p';
-    if (s == 'O') return 'o'; if (s == '#') return 'm';
-    return s;
-}
-
-
-char obtenirBonusColonne(char s) {
-    if (s == 'X') return '1'; if (s == '&') return '2'; if (s == '+') return '3';
-    if (s == 'O') return '4'; if (s == '#') return '5';
-    return s;
-}
-
-
-void detecterEtCreerBonus(char plateau[HAUTEUR][LARGEUR], Curseur coup) {
-    char s = plateau[coup.y][coup.x];
-    if (s == ' ') return;
-
-    // Vérification horizontale
-    int countH = 1, gauche = coup.x - 1, droite = coup.x + 1;
-    while (gauche >= 0 && plateau[coup.y][gauche] == s) { countH++; gauche--; }
-    while (droite < LARGEUR && plateau[coup.y][droite] == s) { countH++; droite++; }
-
-    // Vérification verticale
-    int countV = 1, haut = coup.y - 1, bas = coup.y + 1;
-    while (haut >= 0 && plateau[haut][coup.x] == s) { countV++; haut--; }
-    while (bas < HAUTEUR && plateau[bas][coup.x] == s) { countV++; bas++; }
-
-    if (countH >= 4) plateau[coup.y][coup.x] = obtenirBonusLigne(s);
-    else if (countV >= 4) plateau[coup.y][coup.x] = obtenirBonusColonne(s);
-}
-
-
-void activerPouvoir(char plateau[HAUTEUR][LARGEUR], int x, int y) {
-    char c = plateau[y][x];
-    if (c == ' ') return;
-    // Si bonus '=' (ligne)
-    if (c == 'x' || c == 'a' || c == 'p' || c == 'o' || c == 'm') {
-        for (int j = 0; j < LARGEUR; j++) plateau[y][j] = ' ';
-    }
-    // Si bonus 'H' (colonne)
-    else if (c == '1' || c == '2' || c == '3' || c == '4' || c == '5') {
-        for (int i = 0; i < HAUTEUR; i++) plateau[i][x] = ' ';
-    }
 }
