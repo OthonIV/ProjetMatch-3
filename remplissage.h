@@ -15,6 +15,7 @@ void remplirPlateau(char plateau[HAUTEUR][LARGEUR]);
 void afficherPlateau(char plateau[HAUTEUR][LARGEUR]);
 void afficherInfos(int niveau, int vies, int coups, int temps);
 int estDeMemeCouleur(char a, char b);
+int detecterAlignement(char plateau[HAUTEUR][LARGEUR]);
 void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR]);
 void appliquerGravite(char plateau[HAUTEUR][LARGEUR]);
 

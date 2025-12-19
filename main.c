@@ -111,12 +111,25 @@ int main(void) {
                             if (premier.x == -1) {
                                 premier = sel;
                             } else {
-                                // Vérifier si adjacent
+                                // Vérifier si les cases sont adjacentes
                                 if (abs(premier.x - sel.x) + abs(premier.y - sel.y) == 1) {
+                                    // 1. On tente l'échange
                                     echangerSymboles(plateau, premier, sel);
-                                    coups++;
+                                    
+                                    // 2. On vérifie si cela a créé un alignement
+                                    if (detecterAlignement(plateau)) {
+                                        // Succès !
+                                        coups++;
+                                    } else {
+                                        // Échec : Pas d'alignement, on affiche brièvement et on annule
+                                        gotoxy(0, 0);
+                                        afficherPlateau(plateau); 
+                                        Sleep(200); // Laisse le temps au joueur de voir l'échange raté
+                                        
+                                        echangerSymboles(plateau, premier, sel); // On remet en place
+                                    }
                                 }
-                                premier.x = -1; // Désélectionner
+                                premier.x = -1; // Désélectionner dans tous les cas
                             }
                         }
                         else if (action == 'o' || action == 'O') {

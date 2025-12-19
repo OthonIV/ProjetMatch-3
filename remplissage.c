@@ -240,3 +240,20 @@ void echangerSymboles(char plateau[HAUTEUR][LARGEUR], Curseur c1, Curseur c2) {
     plateau[c1.y][c1.x] = plateau[c2.y][c2.x];
     plateau[c2.y][c2.x] = temp;
 }
+
+// Juste pour revenir en arrière si l'action n'a pas créé d'alignement. C'est pas opti? Oui; mais ça marche.
+int detecterAlignement(char plateau[HAUTEUR][LARGEUR]) {
+    for (int i = 0; i < HAUTEUR; i++) {
+        for (int j = 0; j < LARGEUR; j++) {
+            char ref = plateau[i][j];
+            if (ref == ' ') continue;
+            // Test horizontal
+            if (j <= LARGEUR - 3 && estDeMemeCouleur(ref, plateau[i][j+1]) && estDeMemeCouleur(ref, plateau[i][j+2]))
+                return 1;
+            // Test vertical
+            if (i <= HAUTEUR - 3 && estDeMemeCouleur(ref, plateau[i+1][j]) && estDeMemeCouleur(ref, plateau[i+2][j]))
+                return 1;
+        }
+    }
+    return 0;
+}
