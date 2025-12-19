@@ -35,7 +35,7 @@ int main(void) {
                 remplirPlateau(plateau);
 
                 while (enJeu) {
-                    // --- PHASE 1 : RÉACTION EN CHAÎNE (AUTOMATIQUE) ---
+                    // Affichage du plateau etc...
                     int encoreDesAlignements = 1;
                     while (encoreDesAlignements) {
                         // On compte les cases vides
@@ -56,7 +56,7 @@ int main(void) {
                             afficherPlateau(plateau);
                             Sleep(400); 
                             
-                            // On fait tomber les pions
+                            // On fait tomber les symboles
                             appliquerGravite(plateau);
                             
                             // On affiche le résultat de la chute
@@ -92,7 +92,7 @@ int main(void) {
                         set_color(BLACK, LIGHTGRAY);
                     }
 
-                    // On réimprime JUSTE le caractère (sans crochets pour ne rien décaler)
+                    // On réimprime JUSTE le symbole (sans crochets pour ne rien décaler)
                     printf("%c", plateau[sel.y][sel.x]);
 
                     // On remet les couleurs normales immédiatement

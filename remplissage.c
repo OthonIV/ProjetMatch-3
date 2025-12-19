@@ -105,7 +105,7 @@ int estDeMemeCouleur(char a, char b) {
 
 
 void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR]) {
-    // 0: rien, 1: à supprimer (pion normal ou bonus)
+    // 0: rien, 1: à supprimer (symbole normal ou bonus)
     int aSupprimer[HAUTEUR][LARGEUR] = {0}; 
     int i, j, k, m;
 
@@ -218,7 +218,7 @@ void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR]) {
 void appliquerGravite(char plateau[HAUTEUR][LARGEUR]) {
     for (int j = 0; j < LARGEUR; j++) {
         int vide = HAUTEUR - 1;
-        // On fait descendre les caractères existants
+        // On fait descendre les symboles existants
         for (int i = HAUTEUR - 1; i >= 0; i--) {
             if (plateau[i][j] != ' ') {
                 char temp = plateau[i][j];
@@ -227,7 +227,7 @@ void appliquerGravite(char plateau[HAUTEUR][LARGEUR]) {
                 vide--;
             }
         }
-        // On remplit le haut avec de nouveaux caractères normaux
+        // On remplit le haut avec de nouveaux symboles normaux
         for (int i = vide; i >= 0; i--) {
             plateau[i][j] = symboles[rand() % 5];
         }
