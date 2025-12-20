@@ -126,7 +126,7 @@ int main(void) {
                         afficherPlateau(plateau);
                         Sleep(400); 
 
-                        supprimerAlignements3(plateau, collectesCeTour);
+                        supprimerAlignements3(plateau, collectesCeTour, &maPartie.viesRestantes);
                         
                         for(int i=0; i<5; i++) {
                             contrat.objectifs[i] -= collectesCeTour[i];

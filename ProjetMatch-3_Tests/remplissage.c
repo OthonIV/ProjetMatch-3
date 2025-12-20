@@ -75,9 +75,40 @@ int estDeMemeCouleur(char a, char b) {
     return 0;
 }
 
-void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR], int collectes[5]) {
+
+void supprimerAlignements3(char plateau[HAUTEUR][LARGEUR], int collectes[5], int *vies) {
     int aSupprimer[HAUTEUR][LARGEUR] = {0}; 
     int i, j, k, m;
+
+    // Recherche des alignements de BONUS horizontaux
+    for (i = 0; i < HAUTEUR; i++) {
+        for (j = 0; j <= LARGEUR - 3; j++) {
+            int countBonus = 0;
+            for(int b = 0; b < 3; b++) {
+                char c = plateau[i][j+b];
+                if ((c >= '1' && c <= '5') || (c >= 'A' && c <= 'E')) countBonus++;
+            }
+            if (countBonus == 3) {
+                (*vies)++; // Gain d'une vie
+                for(int b = 0; b < 3; b++) aSupprimer[i][j+b] = 1;
+            }
+        }
+    }
+
+    // Recherche des alignements de BONUS verticaux
+    for (j = 0; j < LARGEUR; j++) {
+        for (i = 0; i <= HAUTEUR - 3; i++) {
+            int countBonus = 0;
+            for(int b = 0; b < 3; b++) {
+                char c = plateau[i+b][j];
+                if ((c >= '1' && c <= '5') || (c >= 'A' && c <= 'E')) countBonus++;
+            }
+            if (countBonus == 3) {
+                (*vies)++; // Gain d'une vie
+                for(int b = 0; b < 3; b++) aSupprimer[i+b][j] = 1;
+            }
+        }
+    }
 
     // Détection Croix de 3x3
     for (i = 1; i < HAUTEUR - 1; i++) {
