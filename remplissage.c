@@ -28,7 +28,6 @@ void remplirPlateau(char plateau[HAUTEUR][LARGEUR]) {
 }
 
 void afficherPlateau(char plateau[HAUTEUR][LARGEUR]) {
-    nettoyerEcran();
     int i, j;
     printf("  ");
     for (j = 0; j < LARGEUR; j++) printf("+---");

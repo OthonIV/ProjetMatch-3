@@ -110,6 +110,7 @@ int main(void) {
                             nettoyerEcran();
                             printf("Voulez-vous reessayer tout de suite (1) ou Sauvegarder et Quitter (2) ? ");
                             int decision = getch();
+                            nettoyerEcran();
                             if (decision == '2') {
                                 sauvegarderPartie(maPartie);
                                 enNiveau = 0;
