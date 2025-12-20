@@ -17,12 +17,11 @@ int afficherMenu() {
     set_color(WHITE, BLACK);
     printf("   1. Lire les regles\n");
     printf("   2. Commencer une nouvelle partie\n");
-    printf("   3. Reprendre la partie\n");
+    printf("   3. Reprendre la sauvegarde\n");
     printf("   4. Quitter\n\n");
 
     printf("   Votre choix : ");
 
-    // lecture sécurisée (évite les bugs scanf)
     choix = getch() - '0';
     printf("%d\n", choix);
 
