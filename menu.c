@@ -54,7 +54,7 @@ void afficherRegles() {
     // Section 3 : Les formes spéciales
     set_color(LIGHTCYAN, BLACK);
     printf(" 3. FORMES SPECIALES :\n");
-    printf("    [ 4/5 Alignes ]       -> Cree un BONUS (= ou H) selon le sens.\n");
+    printf("    [ 4/5 Alignes ]     -> Cree un BONUS (= ou H) selon le sens.\n");
     printf("    [ 3 Bonus Alignes ] -> Les activent et ajoute une vie au joueur.\n");
     printf("    [ 6 Alignes ]       -> Detruit tous les items de cette couleur.\n");
     printf("    [ Croix 3x3 ]       -> Detruit tous les items de cette couleur.\n");
